@@ -1,0 +1,22 @@
+[
+    {
+        "creation_datetime": "2025/09/13, 22:39:11",
+        "deleted": false,
+        "description": "Description",
+        "owner_uuid": "4b7e3c57-ca2b-4f26-9ecb-8816df65adff",
+        "status": "TODO",
+        "task_uuid": "6f844af7-ccca-460f-92a7-8f9f44f7fed0",
+        "title": "My Title",
+        "update_datetime": "2025/09/13, 23:32:21"
+    },
+    {
+        "creation_datetime": "2025/09/13, 22:23:21",
+        "deleted": true,
+        "description": "New DEsc",
+        "owner_uuid": "4b7e3c57-ca2b-4f26-9ecb-8816df65adff",
+        "status": "PENDING",
+        "task_uuid": "1d81ea39-ee74-4527-a964-bb2c6ac17033",
+        "title": "New Title",
+        "update_datetime": "2025/09/14, 15:55:52"
+    }
+]
