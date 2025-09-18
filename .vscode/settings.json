@@ -7,5 +7,10 @@
         "statusBarItem.remoteBackground": "#92b0bb",
         "statusBarItem.remoteForeground": "#15202b"
     },
-    "peacock.color": "#92b0bb"
+    "peacock.color": "#92b0bb",
+    "editor.formatOnSave": true,
+    "black-formatter.args": [
+    "--line-length",
+    "79"
+    ]
 }

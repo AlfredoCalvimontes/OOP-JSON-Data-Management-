@@ -7,7 +7,7 @@ from logging_utils import configure_logger
 
 
 def main():
-    '''Calls tha main initializing functions.'''
+    """Calls tha main initializing functions."""
     try:
         load_dotenv()
         configure_logger()
@@ -16,6 +16,7 @@ def main():
         main_menu()
     except Exception as e:
         import traceback
+
         detailed_traceback = traceback.format_exc()
         raise AppError(f"AppError: {e}.\n{detailed_traceback}")
 
