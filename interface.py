@@ -2,18 +2,18 @@ import sys
 from typing import List
 
 import data_management
-from models import TASK_STATUSES
-from services import createNewUser, createTask, deleteTask, editTask, listUserTasks, login, logout
-from utils import (isValidExistingName, isValidDecision, isValidDescription, isValidName, isValidPass,\
-                   isValidTaskStatus, isValidTitle, PASSWORD_LENGTH, TASK_DESCRIPTION_LENGTH,\
-                   TASK_TITLE_LENGTH, USERNAME_LENGTH, verifyCurrentUser, verifyTaskUuid)
+from constants import TASK_STATUSES
+from services import create_new_user, create_task, delete_task, edit_task, list_user_tasks, login, logout
+from utils import (is_valid_decision, is_valid_description, is_valid_name, is_valid_not_existing_name,\
+                   is_valid_pass, is_valid_task_status, is_valid_title, PASSWORD_LENGTH, TASK_DESCRIPTION_LENGTH,\
+                   TASK_TITLE_LENGTH, USERNAME_LENGTH, verify_current_user, verify_task_uuid)
 
 
-state = data_management.getPersistentdata()
+state = data_management.get_persistent_data()
 
 
 
-def askData(items: List) -> None:
+def ask_data(items: List) -> List:
     ''' 
     It get all the listed data and validate it.
     It iterates though each item and calls the validation function
@@ -45,131 +45,131 @@ def welcome() -> None:
           ''')
 
 
-def createNewUserAction() -> None:
+def create_new_user_action() -> None:
     '''Asks for name and password and creates a new user.'''
     items = [
         {
             "message": f"Introduce an alphanumeric name of {USERNAME_LENGTH} characters: ",
-            "validation_function": isValidName
+            "validation_function": is_valid_not_existing_name
         },
         {
             "message": f"Introduce an alphanumeric password of {PASSWORD_LENGTH} characters: ",
-            "validation_function": isValidPass
+            "validation_function": is_valid_pass
         }
             ]
 
-    name, password = askData(items)
-    createNewUser(name, password)
+    name, password = ask_data(items)
+    create_new_user(name, password)
 
 
-def loginAction() -> None:
+def login_action() -> None:
     '''Asks for username and password and register it in the session.'''
     items = [
         {
             "message": "Introduce your username: ",
-            "validation_function": isValidExistingName
+            "validation_function": is_valid_name
         },
         {
             "message": "Introduce your password: ",
-            "validation_function": isValidPass
+            "validation_function": is_valid_pass
         }
             ]
 
-    name, password = askData(items)
+    name, password = ask_data(items)
     login(name, password)
 
 
-def logoutAction() -> None:
+def logout_action() -> None:
     '''Restores the current user to None and close the session.'''
     logout()
 
 
-@verifyCurrentUser
-def listUserTasksAction() -> None:
+@verify_current_user
+def list_user_tasks_action() -> None:
     '''Prints the list of all tasks the user created.'''
-    listUserTasks()
+    list_user_tasks()
 
 
-@verifyCurrentUser
-def createTaskAction() -> None:
+@verify_current_user
+def create_taskAction() -> None:
     '''Asks for title and description and creates a new task.'''
     items = [
         {
             "message": f"Introduce the task Title ({TASK_TITLE_LENGTH}): ",
-            "validation_function": isValidTitle
+            "validation_function": is_valid_title
         },
         {
             "message": f"Introduce the task Description ({TASK_DESCRIPTION_LENGTH}): ",
-            "validation_function": isValidDescription
+            "validation_function": is_valid_description
         }
             ]
-    title, description = askData(items)
-    createTask(title, description)
+    title, description = ask_data(items)
+    create_task(title, description)
 
 
-@verifyCurrentUser
-def editTaskAction() -> None:
+@verify_current_user
+def edit_task_action() -> None:
     '''Asks for the task UUID, title and description and updates the task.'''
     items = [
         {
             "message": f"Introduce the task UUID to edit: ",
-            "validation_function": verifyTaskUuid
+            "validation_function": verify_task_uuid
         },
         {
             "message": f"Introduce the task Title ({TASK_TITLE_LENGTH}): ",
-            "validation_function": isValidTitle
+            "validation_function": is_valid_title
         },
         {
             "message": f"Introduce the task Description ({TASK_DESCRIPTION_LENGTH}): ",
-            "validation_function": isValidDescription
+            "validation_function": is_valid_description
         },
         {
             "message": f"Introduce the task status ({TASK_STATUSES['todo']}: t, {TASK_STATUSES['pending']}: p,\
  {TASK_STATUSES['done']}: d): ",
-            "validation_function": isValidTaskStatus
+            "validation_function": is_valid_task_status
         }
             ]
-    task_uuid, title, description, status = askData(items)
-    editTask(task_uuid, title, description, status)
+    task_uuid, title, description, status = ask_data(items)
+    edit_task(task_uuid, title, description, status)
 
 
-@verifyCurrentUser
-def deleteTaskAction() -> None:
+@verify_current_user
+def delete_task_action() -> None:
     '''Asks for the task UUID, verify the decision and deletes the task.'''
     items = [
         {
             "message": f"Introduce the task UUID to edit: ",
-            "validation_function": verifyTaskUuid
+            "validation_function": verify_task_uuid
         },
         {
             "message": f"Sure? (y) Yes (n) No: ",
-            "validation_function": isValidDecision
+            "validation_function": is_valid_decision
         }
             ]
-    task_uuid, answer = askData(items)
+    task_uuid, answer = ask_data(items)
     if answer:
-        deleteTask(task_uuid)
+        delete_task(task_uuid)
 
 
 def exitAction():
     '''Closes the app and stores the data.'''
-    data_management.saveData()
+    data_management.data_saving()
     sys.exit()
 
 
 MENU_ITEMS = [
-    ('Create new User', createNewUserAction),
-    ('Login', loginAction),
-    ('Logout', logoutAction),
-    ('Create Task', createTaskAction),
-    ('List your tasks', listUserTasksAction),
-    ('Edit task', editTaskAction),
-    ('Delete task', deleteTaskAction),
+    ('Create new User', create_new_user_action),
+    ('Login', login_action),
+    ('Logout', logout_action),
+    ('Create Task', create_taskAction),
+    ('List your tasks', list_user_tasks_action),
+    ('Edit task', edit_task_action),
+    ('Delete task', delete_task_action),
     ('Exit', exitAction),
 ]
 
 
-def generateMenu() -> str:
+def generate_menu() -> str:
     '''Generates the menu text using the MENU_ITEMS list.'''
     menu_text = ''
     for index, menu_entry in enumerate(MENU_ITEMS, 1):
@@ -180,10 +180,10 @@ def generateMenu() -> str:
 def main_menu() -> None:
     '''Presents and iterates the menu.'''
     while True:
-        username = None if state['current_user'] == None else state['current_user'].getUserName()
+        username = None if state['current_user'] == None else state['current_user'].get_user_name()
         print(f'''
         Task Manager 20000 { f'/// User: {username}' if username != None else ' '}
-        Choose an option:\n{generateMenu()}
+        Choose an option:\n{generate_menu()}
         ''')
         selected_option = input()
         if selected_option.isdigit() and int(selected_option) >= 1 and int(selected_option) <= 8:

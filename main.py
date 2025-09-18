@@ -1,17 +1,23 @@
+from dotenv import load_dotenv
+
 from interface import main_menu, welcome
-from data_management import dataLoading
+from error_management.exceptions import AppError
+from data_management import data_loading
+from logging_utils import configure_logger
 
 
 def main():
     '''Calls tha main initializing functions.'''
     try:
-        dataLoading()
+        load_dotenv()
+        configure_logger()
+        data_loading()
         welcome()
         main_menu()
     except Exception as e:
-        print(f"Error occurred: {e}")
         import traceback
-        traceback.print_exc()
+        detailed_traceback = traceback.format_exc()
+        raise AppError(f"AppError: {e}.\n{detailed_traceback}")
 
 
 if __name__ == "__main__":
