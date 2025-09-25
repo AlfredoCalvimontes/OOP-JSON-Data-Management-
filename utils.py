@@ -1,3 +1,4 @@
+import argparse
 import uuid
 from typing import Any
 
@@ -5,49 +6,25 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
 import data_management
+from constants import (
+    TASK_STATUSES,
+    USERNAME_LENGTH,
+    PASSWORD_LENGTH,
+    TASK_TITLE_LENGTH,
+    TASK_DESCRIPTION_LENGTH,
+)
 from error_management.exception_utils import validation_exception_manager
 from error_management.exceptions import (
     PasswordAuthenticationError,
-    SessionError,
     TaskNotFoundError,
     ValidationError,
 )
 from logging_utils import get_logger
 
 
-USERNAME_LENGTH = 6
-PASSWORD_LENGTH = 8
-TASK_TITLE_LENGTH = 20
-TASK_DESCRIPTION_LENGTH = 60
-
 state = data_management.get_persistent_data()
 hasher = PasswordHasher()
 logger = get_logger(__name__)
-
-
-# ////// Decorators \\\\\\ #
-
-
-def verify_current_user(func):
-    """
-    Decorator to verify if there is a user currently loged.
-    If there's not current session it doesn't execute the function.
-    """
-
-    def wrapper(*args, **kwargs):
-        try:
-            if state["current_user"] is not None:
-                func(*args, **kwargs)
-            else:
-                raise SessionError(
-                    "There's no session intialized.\nFirst login please."
-                )
-        except SessionError as se:
-            logger.info(f"verify_current_user: {se}")
-        except Exception as e:
-            logger.error(f"Error: in verify_current_user: {e}")
-
-    return wrapper
 
 
 # ////// Inner validation funcrtions \\\\\\ #
@@ -55,9 +32,11 @@ def verify_current_user(func):
 
 @validation_exception_manager
 def is_valid_text(value: str, param_name: str, is_one_word: bool) -> bool:
-    """Returns True if value is a string and it's a propper text,
-    excluding spaces if is_one_word is True."""
-    if isinstance(value, str):
+    """
+    Returns True if value is a string and it's a propper text,
+    excluding spaces if is_one_word is True.
+    """
+    if not isinstance(value, str):
         raise ValidationError("It should be a string.", value, param_name)
     if is_one_word:
         if not value.isalnum():
@@ -113,8 +92,10 @@ def is_valid_word(value: str, param_name: str, long: int) -> bool:
 
 @validation_exception_manager
 def is_valid_sentence(value: str, param_name: str, long: int) -> bool:
-    """Returns True if the value is propper text with spaces and it's
-    lenght is less than the requested long."""
+    """
+    Returns True if the value is propper text with spaces and it's
+    lenght is less than the requested long.
+    """
     if not is_valid_text(value, param_name, False):
         return False
     if not is_less_than(value, param_name, long):
@@ -258,6 +239,78 @@ def is_valid_task_status(status: str) -> bool:
     if status != "t" and status != "p" and status != "d":
         raise ValidationError(error_message, str(status), "uuid_text")
     return True
+
+
+# ////// One Parameter Validation functions for argparse types \\\\\\ #
+
+
+def is_valid_not_existing_name_arg(name: str) -> str:
+    """Argparse type function for validating a not registered name."""
+    if is_valid_not_existing_name(name):
+        return name
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Introduce an alphanumeric name of {USERNAME_LENGTH} characters."
+        )
+
+
+def is_valid_pass_arg(password: str) -> str:
+    """Argparse type function for validating a password."""
+    if is_valid_pass(password):
+        return password
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Introduce an alphanumeric password of {PASSWORD_LENGTH} characters."
+        )
+
+
+def is_valid_name_arg(password: str) -> str:
+    """Argparse type function for validating a user name."""
+    if is_valid_name(password):
+        return password
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Introduce an alphanumeric name of {USERNAME_LENGTH} characters."
+        )
+
+
+def is_valid_title_arg(password: str) -> str:
+    """Argparse type function for validating a task title."""
+    if is_valid_title(password):
+        return password
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Introduce the task Title of ({TASK_TITLE_LENGTH}) lenght."
+        )
+
+
+def is_valid_description_arg(password: str) -> str:
+    """Argparse type function for validating a task description."""
+    if is_valid_description(password):
+        return password
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Introduce the task Description ({TASK_DESCRIPTION_LENGTH}) lenght."
+        )
+
+
+def verify_task_uuid_arg(password: str) -> str:
+    """Argparse type function for validating a task UUID."""
+    if verify_task_uuid(password):
+        return password
+    else:
+        raise argparse.ArgumentTypeError("Introduce the task UUID to edit.")
+
+
+def is_valid_task_status_arg(password: str) -> str:
+    """Argparse type function for validating a task status."""
+    if is_valid_task_status(password):
+        return password
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Introduce the task status ({TASK_STATUSES['todo']}: t, \
+                {TASK_STATUSES['pending']}: p, {TASK_STATUSES['done']}: d)."
+        )
 
 
 # ////// Others \\\\\\ #

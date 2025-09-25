@@ -1,9 +1,13 @@
+import sys
+
 from dotenv import load_dotenv
 
-from interface import main_menu, welcome
-from error_management.exceptions import AppError
 from data_management import data_loading
+from error_management.exceptions import AppError
+from frontend.interface import main_menu, welcome
+from frontend.arg_interface import run_command
 from logging_utils import configure_logger
+from session_management import load_session
 
 
 def main():
@@ -12,8 +16,12 @@ def main():
         load_dotenv()
         configure_logger()
         data_loading()
-        welcome()
-        main_menu()
+        load_session()
+        if len(sys.argv) > 1:
+            run_command()
+        else:
+            welcome()
+            main_menu()
     except Exception as e:
         import traceback
 

@@ -11,7 +11,9 @@ from models import DataEntitySet
 logger = get_logger(__name__)
 # We use a state here becouse a dictinary maintain the references, not copies.
 # It stores the data on sets of objects.
-state = {"current_user": None}
+state: dict[str, Any] = {
+    "current_user": {"user": None, "loged_in_datetime": None}
+}
 
 
 def data_object_loading(

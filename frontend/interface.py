@@ -2,7 +2,13 @@ import sys
 from typing import List
 
 import data_management
-from constants import TASK_STATUSES
+from constants import (
+    TASK_STATUSES,
+    USERNAME_LENGTH,
+    PASSWORD_LENGTH,
+    TASK_TITLE_LENGTH,
+    TASK_DESCRIPTION_LENGTH,
+)
 from services import (
     create_new_user,
     create_task,
@@ -12,6 +18,11 @@ from services import (
     login,
     logout,
 )
+from session_management import (
+    verify_session_expired,
+    verify_current_user,
+    get_session_user,
+)
 from utils import (
     is_valid_decision,
     is_valid_description,
@@ -20,11 +31,6 @@ from utils import (
     is_valid_pass,
     is_valid_task_status,
     is_valid_title,
-    PASSWORD_LENGTH,
-    TASK_DESCRIPTION_LENGTH,
-    TASK_TITLE_LENGTH,
-    USERNAME_LENGTH,
-    verify_current_user,
     verify_task_uuid,
 )
 
@@ -209,8 +215,8 @@ def main_menu() -> None:
     while True:
         username = (
             None
-            if state["current_user"] is None
-            else state["current_user"].get_user_name()
+            if verify_session_expired()
+            else get_session_user().get_user_name()
         )
         user_loged_line = (
             f"/// User: {username}" if username is not None else " "

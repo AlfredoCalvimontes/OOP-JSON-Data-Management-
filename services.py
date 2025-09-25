@@ -1,5 +1,10 @@
 import data_management
-from constants import TASK_STATUSES
+from constants import TASK_STATUSES, SESSION_TIME
+from session_management import (
+    get_session_user,
+    save_session,
+    set_defatult_session_value,
+)
 from utils import validate_user_not_exists, hash_word, verify_hashed_word
 
 
@@ -24,18 +29,20 @@ def login(username: str, password: str) -> None:
     if user is not None:
         stored_password = user.get_data()["password"]
         if verify_hashed_word(password, stored_password):
-            state["current_user"] = user
-            print(f'Logged as "{username}"')  # TODO: Logg or argparse
+            save_session(user)
+            print(
+                f'Logged as "{username}", the session will expire in {SESSION_TIME} minutes.'
+            )
         else:
-            print("The password is not correct.")  # TODO: Logg or argparse
+            print("The password is not correct.")
     else:
-        print("The username doesn't exist.")  # TODO: Logg or argparse
+        print("The username doesn't exist.")
 
 
 def logout() -> None:
     """Restores the current user to None and closes the session."""
-    state["current_user"] = None
-    print("User Logout.")  # TODO: Logg or argparse
+    set_defatult_session_value()
+    print("User Logout.")
 
 
 # ////// Task Functions \\\\\\ #
@@ -43,14 +50,14 @@ def logout() -> None:
 
 def list_user_tasks() -> None:
     """Prints all the tasks created by the current user."""
-    user_uuid = state["current_user"].get_user_uuid()
+    user_uuid = get_session_user().get_user_uuid()
     user_tasks = state["taskset"].get_user_tasks(user_uuid)
-    [print(task) for task in user_tasks]  # TODO: Logg or argparse
+    [print(task) for task in user_tasks]
 
 
 def create_task(title: str, description: str) -> None:
     """Creates and prints a task related to the current user."""
-    user_uuid = state["current_user"].get_user_uuid()
+    user_uuid = get_session_user().get_user_uuid()
     data = {
         "title": title,
         "description": description,
@@ -58,7 +65,7 @@ def create_task(title: str, description: str) -> None:
     }
     state["taskset"].add_jSON(data)
     task = state["taskset"].get_last_user_created_task()
-    print(task)  # TODO: Logg or argparse
+    print(task)
 
 
 def edit_task(
